@@ -32,8 +32,8 @@ jobs:
         -exportOptionsPlist ExportOptions.plist \
         -exportPath build/ipa
 
-    - name: Upload IPA
-      uses: actions/upload-artifact@v3
-      with:
-        name: Vita3K.ipa
-        path: build/ipa/*.ipa
+- name: Upload IPA
+  uses: actions/upload-artifact@v2
+  with:
+    name: Vita3K.ipa
+    path: build/ipa/*.ipa
