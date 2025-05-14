@@ -1,0 +1,39 @@
+name: Build Vita3K for iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew install ninja
+
+    - name: Xcode Archive
+      run: |
+        xcodebuild clean archive \
+        -project Vita3K.xcodeproj \
+        -scheme Vita3K \
+        -configuration Release \
+        -archivePath build/Vita3K.xcarchive \
+        CODE_SIGNING_ALLOWED=NO
+
+    - name: Export IPA
+      run: |
+        xcodebuild -exportArchive \
+        -archivePath build/Vita3K.xcarchive \
+        -exportOptionsPlist ExportOptions.plist \
+        -exportPath build/ipa
+
+    - name: Upload IPA
+      uses: actions/upload-artifact@v3
+      with:
+        name: Vita3K.ipa
+        path: build/ipa
