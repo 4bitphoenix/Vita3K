@@ -6,34 +6,26 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode_14.2.app
+
       - name: Install dependencies
-        run: |
-          brew update
-          brew install ninja
+        run: brew install cmake ninja python3
 
-      - name: Xcode Archive
+      - name: Configure and build
         run: |
-          xcodebuild clean archive \
-            -project Vita3K.xcodeproj \
-            -scheme Vita3K \
-            -configuration Release \
-            -archivePath build/Vita3K.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
+          mkdir build-ios
+          cd build-ios
+          cmake .. -G Ninja -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
+          ninja
 
-      - name: Export IPA
+      - name: Package .ipa
         run: |
-          xcodebuild -exportArchive \
-            -archivePath build/Vita3K.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
-            -exportPath build/ipa
-
-      - name: Upload IPA
-        uses: actions/upload-artifact@v2
-        with:
-          name: Vita3K.ipa
-          path: build/ipa/*.ipa
+          mkdir Payload
+          cp -R build-ios/Vita3K.app Payload/
+          zip -r Vita3K.ipa Payload
+        if: success()
