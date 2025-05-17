@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive  # This is critical to pull Dynarmic, Boost, etc.
 
       - name: Set up Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
@@ -26,9 +28,14 @@ jobs:
 
       - name: Package .ipa
         run: |
-          # Replace this with actual packaging logic
-          mkdir output
+          mkdir -p output
           echo "Pretend this is your .ipa" > output/Vita3K.ipa
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vita3k-ios
+          path: output/Vita3K.ipa
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
